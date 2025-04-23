@@ -1,5 +1,7 @@
 import os
 import subprocess
+import time
+import psutil
 
 def choose_attack_mode():
     print("Select the attack mode:")
@@ -31,30 +33,78 @@ def get_hashcat_mode(algorithm):
     }
     return modes.get(algorithm)
 
+
 def run_hashcat(hash_file, algorithm, attack_config):
     hashcat_mode = get_hashcat_mode(algorithm)
     if hashcat_mode is None:
         print(f"Unsupported algorithm: {algorithm}")
         return
 
-    cmd = [
-        "hashcat",
-        "-m", str(hashcat_mode),
-        "-a", str(attack_config["mode"]),
-        hash_file
-    ]
+    # Read hashes from the file
+    with open(hash_file, "r") as file:
+        hashes = file.readlines()
 
-    if attack_config["mode"] == 0:
-        cmd.append(attack_config["wordlist"])
-    elif attack_config["mode"] == 3:
-        cmd.append(attack_config["mask"])
-    elif attack_config["mode"] == 6:
-        cmd.extend([attack_config["wordlist"], attack_config["mask"]])
+    # Open the output file for writing
+    output_file = "crack_times_and_memory.txt"
+    with open(output_file, "w") as output:
+        output.write("Hash\tTime Taken (seconds)\tPeak Memory (MB)\n")  # Write header
 
-    cmd.extend(["--opencl-device-types", "2"])  # Use GPU
-    cmd.extend(["--runtime", "18000"])
-    print("Running:", " ".join(cmd))
-    subprocess.run(cmd)
+        # Process each hash individually
+        for single_hash in hashes:
+            single_hash = single_hash.strip()  # Remove any extra whitespace
+            if not single_hash:
+                continue  # Skip empty lines
+
+            cmd = [
+                "hashcat",
+                "-m", str(hashcat_mode),
+                "-a", str(attack_config["mode"]),
+                single_hash
+            ]
+
+            if attack_config["mode"] == 0:
+                cmd.append(attack_config["wordlist"])
+            elif attack_config["mode"] == 3:
+                cmd.append(attack_config["mask"])
+            elif attack_config["mode"] == 6:
+                cmd.extend([attack_config["wordlist"], attack_config["mask"]])
+
+            cmd.extend(["--opencl-device-types", "2"])  # Use GPU
+            cmd.extend(["--runtime", "18000"])
+
+            print(f"Running for hash: {single_hash}")
+            print("Command:", " ".join(cmd))
+
+            # Measure the start time
+            start_time = time.time()
+
+            # Start the Hashcat process and track memory usage
+            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            peak_memory = 0
+            while process.poll() is None:  # While the process is running
+                try:
+                    # Get the memory info of the process
+                    current_process = psutil.Process(process.pid)
+                    memory_info = current_process.memory_info()
+                    peak_memory = max(peak_memory, memory_info.rss / (1024 * 1024))  # Convert to MB
+                except psutil.NoSuchProcess:
+                    break
+
+            # Wait for the process to finish
+            process.communicate()
+
+            # Measure the end time
+            end_time = time.time()
+
+            # Calculate the time taken
+            time_taken = end_time - start_time
+            print(f"Time taken to crack hash {single_hash}: {time_taken:.2f} seconds")
+            print(f"Peak memory used for hash {single_hash}: {peak_memory:.2f} MB\n")
+
+            # Write the result to the output file
+            output.write(f"{single_hash}\t{time_taken:.2f}\t{peak_memory:.2f}\n")
+
+    print(f"Results saved to {output_file}")
 
 def main():
     algorithms = {
