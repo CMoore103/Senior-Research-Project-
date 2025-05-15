@@ -1,0 +1,35 @@
+BRUTE FORCE MEDIUM:
+MD5 - Estimated cracking time: 0 years, 0 days, 0 hours, 45 minutes, 27 seconds
+BCRYPT - Estimated cracking time: 60 years, 55 days, 13 hours, 21 minutes, 23 seconds
+SCRYPT - Estimated cracking time: 2928 years, 266 days, 16 hours, 45 minutes, 55 seconds
+
+
+BRUTE FORCE WEAK:
+MD5 - Estimated cracking time: 0 years, 0 days, 0 hours, 0 minutes, 0 seconds
+BCRYPT - Estimated cracking time: 0 years, 0 days, 5 hours, 15 minutes, 12 seconds
+SCRYPT - Estimated cracking time: 0 years, 10 days, 15 hours, 46 minutes, 44 seconds
+
+BRUTE FORCE STRONG: 
+MD5 - Estimated cracking time: 214007 years, 98 days, 1 hours, 51 minutes, 11 seconds
+BCRYPT - Estimated cracking time: 148867992841 years, 354 days, 21 hours, 43 minutes, 28 seconds
+SCRYPT - Estimated cracking time: 7248183577035 years, 42 days, 14 hours, 24 minutes, 0 seconds
+
+
+
+
+
+
+
+
+
+DICTIONARY ATTACKS: 
+BCRYPT (Memory Usage = 4.3 GB): MEDIUM ATTACKS EST TIME = 4 DAYS, 7 HOURS, WEAK ATTACKS =  3 DAYS 17 HOURS, STRONG = 5 DAYS 2 HOURS
+MD5: WEAK: 0.174 seconds, MEDIUM: 1.52 seconds, STRONG: 2.48 seconds 
+
+
+HYBRID ATTACKS: 
+BCRYPT - WEAK: 10 YEARS MEDIUM: 11 YEARS: 12 YEARS: STRONG 13 YEARS
+MD5: WEAK - 4 Minutes 23 Seconds: MEDIUM - 11 HOURS 2 MINUTES STRONG:  12 HOURS 49 MINUTES (MEMORY = 1.92 GB)
+
+
+

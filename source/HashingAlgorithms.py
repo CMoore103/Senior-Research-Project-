@@ -3,6 +3,9 @@ import bcrypt
 import os
 from argon2 import PasswordHasher
 import time
+import base64
+import binascii
+
 
 # Initialize Argon2 hasher
 ph = PasswordHasher()
@@ -18,9 +21,28 @@ def hash_bcrypt(password):
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
 def hash_scrypt(password):
+    # Generate a random 16-byte salt
     salt = os.urandom(16)
-    key = hashlib.scrypt(password.encode(), salt=salt, n=16384, r=8, p=1, dklen=32)
-    return salt.hex() + ':' + key.hex()
+
+    # Scrypt parameters
+    N = 1024  # CPU/memory cost factor
+    r = 1     # Block size
+    p = 1     # Parallelization factor
+    dklen = 32  # Length of the derived key
+
+    # Generate the scrypt-derived key
+    key = hashlib.scrypt(password.encode(), salt=salt, n=N, r=r, p=p, dklen=dklen)
+
+    # Convert salt and key to base64
+    salt_b64 = base64.b64encode(salt).decode('utf-8').rstrip('=')
+    key_b64 = base64.b64encode(key).decode('utf-8').rstrip('=')
+
+    # Convert N to log2(N) for Hashcat compatibility
+    ln = int(N).bit_length() - 1
+
+    # Return the properly formatted scrypt hash
+    return f"$scrypt$ln={ln},r={r},p={p}${salt_b64}${key_b64}"
+
 
 def hash_argon2(password):
     return ph.hash(password)
